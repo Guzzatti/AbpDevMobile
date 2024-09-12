@@ -1,9 +1,7 @@
-import "./global.css";
-
-import "react-native-gesture-handler";
-
-import RootStack from "./navigation";
+// App.tsx
+import React from 'react';
+import TabNavigator from './navigation/tab-navigator';
 
 export default function App() {
-  return <RootStack />;
+  return <TabNavigator />;
 }

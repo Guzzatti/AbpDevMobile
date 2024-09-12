@@ -1,7 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
-import Modal from "../screens/modal";
+import Modal from "../screens/MapScreen";
 import TabNavigator from "./tab-navigator";
 
 export type RootStackParamList = {
