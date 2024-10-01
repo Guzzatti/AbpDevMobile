@@ -4,9 +4,10 @@ import { Modal, View, Text, TextInput, Pressable, Switch, StyleSheet, Alert } fr
 type CreateEventModalProps = {
   isVisible: boolean;
   onClose: () => void;
+  onSave: (eventName: string, isPublic: boolean) => void; // Adicionando callback para salvar
 };
 
-const CreateEventModal = ({ isVisible, onClose }: CreateEventModalProps) => {
+const CreateEventModal = ({ isVisible, onClose, onSave }: CreateEventModalProps) => {
   const [eventName, setEventName] = useState<string>('');
   const [isPublic, setIsPublic] = useState<boolean>(false);
 
@@ -16,10 +17,11 @@ const CreateEventModal = ({ isVisible, onClose }: CreateEventModalProps) => {
       return;
     }
 
-    // Add your save logic here (e.g., send data to Firebase)
-
-    console.log(`Event Name: ${eventName}, Public: ${isPublic}`);
-    onClose(); // Fechar o modal após salvar
+    // Chama a função de salvar passando os dados do evento
+    onSave(eventName, isPublic);
+    onClose(); // Fecha o modal após salvar
+    setEventName(''); // Limpa o campo de entrada
+    setIsPublic(false); // Reseta o switch
   };
 
   return (
