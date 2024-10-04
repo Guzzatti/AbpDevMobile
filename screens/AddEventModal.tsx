@@ -82,7 +82,6 @@ const AddEventModal = () => {
       .catch((error) => {
         console.error('Erro ao salvar evento: ', error);
       });
-
   };
 
   return (
@@ -110,6 +109,7 @@ const AddEventModal = () => {
             <DateTimePickerModal
               isVisible={isDatePickerVisible}
               mode="datetime"
+              display="spinner" // Muda a exibição para o modo spinner
               onConfirm={handleConfirm}
               onCancel={hideDatePicker}
             />
