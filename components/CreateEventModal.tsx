@@ -29,7 +29,7 @@ const CreateEventModal = ({ isVisible, onClose, onSave }: CreateEventModalProps)
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Create New Event</Text>
-          
+
           <TextInput
             style={styles.input}
             placeholder="Enter event name"
@@ -39,10 +39,7 @@ const CreateEventModal = ({ isVisible, onClose, onSave }: CreateEventModalProps)
 
           <View style={styles.switchContainer}>
             <Text>Public Event</Text>
-            <Switch
-              value={isPublic}
-              onValueChange={setIsPublic}
-            />
+            <Switch value={isPublic} onValueChange={setIsPublic} />
           </View>
 
           <View style={styles.buttonsContainer}>
