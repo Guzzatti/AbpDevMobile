@@ -105,7 +105,8 @@ const MapScreen = () => {
               key={event.id}
               coordinate={{ latitude: event.latitude, longitude: event.longitude }}
               title={event.title}
-              onPress={() => handleEventPress(event)} // Abre o modal de evento
+              description={event.description}
+              onCalloutPress={() => handleEventPress(event)}
             />
           ))}
         </MapView>
