@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, Button } from 'react-native';
 import { auth } from '../utils/firebase';
 import { signOut } from 'firebase/auth';
 import { TouchableOpacity } from 'react-native';
@@ -10,16 +10,15 @@ import { NavigationProp } from '@react-navigation/native';
 type FeedScreenProps = {
   Feed: undefined;
   Login: undefined;
+  Configurações: undefined;
 };
 
 const FeedScreen = () => {
   const navigation = useNavigation<NavigationProp<FeedScreenProps>>();
   const handleLogout = async () => {
-    signOut(auth)
-      .then(() => {
-        console.log('Usuário deslogado');
-      })
-      .catch((error) => {});
+    signOut(auth).catch((error) => {
+      console.log('Erro ao sair da conta', error);
+    });
   };
 
   useEffect(() => {
@@ -35,7 +34,7 @@ const FeedScreen = () => {
   }, [navigation]);
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 10 }}>
-      <Text>Create Account Screen</Text>
+      <Text>Feed Screen</Text>
       <TouchableOpacity
         onPress={() => handleLogout()}
         style={{

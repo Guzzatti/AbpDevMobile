@@ -1,87 +1,134 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, TextInput, Button, Dimensions } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NavigationProp } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  Button,
+  Dimensions,
+  Switch,
+  TouchableOpacity,
+} from 'react-native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import MapView, { Marker, MapPressEvent } from 'react-native-maps';
 import * as Location from 'expo-location';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { Switch } from 'react-native-gesture-handler';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { auth, db } from 'utils/firebase';
-import { collection, addDoc, updateDoc, doc, getDocs } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 
 type RootStackParamList = {};
 
+type LocationType = {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+};
+
 const AddEventModal = () => {
+  const [UserLocation, setUserLocation] = useState<LocationType | null>(null);
+  const user = auth.currentUser;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  // Variáveis para coleta dos dados
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [isMapVisible, setIsMapVisible] = useState(false);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isPublic, setIsPublic] = useState<boolean>(false);
 
-  // Mostra o mapa para selecionar uma localização
-  const handleSelectLocation = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      console.log('Permissão de localização negada');
-      return;
-    }
-    setIsMapVisible(true);
-  };
+  // Picker states
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
+
+  // Função para pegar a localização do usuário
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permissão de localização negada');
+        return;
+      }
+
+      let userLocation = await Location.getCurrentPositionAsync({});
+      setUserLocation({
+        latitude: userLocation.coords.latitude,
+        longitude: userLocation.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+    })();
+  }, []);
 
   // Atualiza a localização ao pressionar um ponto no mapa
   const handleMapPress = (event: MapPressEvent) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     setLocation({ latitude, longitude });
-    setIsMapVisible(false); // Fecha o mapa após selecionar o ponto
+    setIsMapVisible(false);
   };
 
-  // Mostra o DateTimePicker
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
-
-  // Esconde o DateTimePicker
-  const hideDatePicker = () => {
-    setDatePickerVisibility(false);
-  };
-
-  // Confirma a data e horário selecionado
-  const handleConfirm = (date: Date) => {
-    setSelectedDate(date);
-    hideDatePicker();
-  };
-
-  const user = auth.currentUser;
-
-  // Salva o evento
-  const handleSaveEvent = () => {
-    if (!title || !description || !selectedDate || !location) {
-      alert('Preencha todos os campos');
+  // Função para salvar evento
+  const handleSaveEvent = (
+    title: string,
+    description: string,
+    date: string,
+    time: string,
+    isPublic: boolean,
+    latitude: number,
+    longitude: number
+  ) => {
+    if (!user) {
+      alert('Necessário estar logado para criar um evento');
       return;
     }
-
     const event = {
       title,
       description,
-      date: selectedDate.toISOString().split('T')[0], // Apenas data
-      time: selectedDate.toISOString().split('T')[1].slice(0, 5), // Apenas horário
-      latitude: location.latitude,
-      longitude: location.longitude,
+      date,
+      time,
+      latitude,
+      longitude,
       isPublic,
       user: user?.uid,
     };
 
     addDoc(collection(db, 'events'), event)
       .then(() => {
-        console.log('Evento salvo com sucesso');
+        alert('Evento salvo com sucesso');
         navigation.goBack();
       })
       .catch((error) => {
-        console.error('Erro ao salvar evento: ', error);
+        alert('Erro ao salvar evento');
       });
+  };
+
+  // Função para mostrar o picker de data
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  // Função para mostrar o picker de hora
+  const showTimePicker = () => {
+    setTimePickerVisibility(true);
+  };
+
+  // Atualiza a data selecionada
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setDatePickerVisibility(false);
+    if (selectedDate) setSelectedDate(selectedDate);
+  };
+
+  // Atualiza a hora selecionada
+  const handleTimeChange = (event: any, selectedTime?: Date) => {
+    setTimePickerVisibility(false);
+    if (selectedTime && selectedDate) {
+      const updatedDate = new Date(selectedDate);
+      updatedDate.setHours(selectedTime.getHours());
+      updatedDate.setMinutes(selectedTime.getMinutes());
+      setSelectedDate(updatedDate);
+    }
   };
 
   return (
@@ -90,78 +137,105 @@ const AddEventModal = () => {
         <>
           <Pressable style={[StyleSheet.absoluteFill]} onPress={() => navigation.goBack()} />
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Create New Event</Text>
+            <Text style={styles.modalTitle}>Criar Novo Evento</Text>
 
             <TextInput
               style={styles.input}
-              placeholder="Enter event name"
+              placeholder="Digite o nome do evento"
               value={title}
               onChangeText={setTitle}
             />
             <TextInput
               style={styles.input}
-              placeholder="Enter event description"
+              placeholder="Digite a descrição do evento"
               value={description}
               onChangeText={setDescription}
             />
 
-            <Button title="Select Date & Time" onPress={showDatePicker} />
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible}
-              mode="datetime"
-              display="spinner" // Muda a exibição para o modo spinner
-              onConfirm={handleConfirm}
-              onCancel={hideDatePicker}
-            />
+            <Button title="Selecionar Data" onPress={()=>{showDatePicker()}} />
+            {isDatePickerVisible && (
+              <DateTimePicker
+                value={selectedDate || new Date()}
+                mode="date"
+                display="spinner"
+                onChange={handleDateChange}
+              />
+            )}
+
+            <Button title="Selecionar Hora" onPress={()=>{showTimePicker()}} />
+            {isTimePickerVisible && (
+              <DateTimePicker
+                value={selectedDate || new Date()}
+                mode="time"
+                display="spinner"
+                is24Hour={true}
+                onChange={handleTimeChange}
+              />
+            )}
 
             <Text>
               {selectedDate
-                ? `Selected Date & Time: ${selectedDate.toLocaleDateString()} ${selectedDate.toLocaleTimeString()}`
-                : 'No date & time selected'}
+                ? `Data e Hora Selecionada: ${selectedDate.toLocaleDateString('pt-br')} ${selectedDate.toLocaleTimeString('pt-br')}`
+                : 'Nenhuma data e hora selecionada'}
             </Text>
 
-            <Button title="Select Location on Map" onPress={handleSelectLocation} />
-
+            <Button title="Selecionar Localização no Mapa" onPress={() => setIsMapVisible(true)} />
             {location && (
               <Text>
-                Selected Location: {location.latitude}, {location.longitude}
+                Localização Selecionada: {location.latitude}, {location.longitude}
               </Text>
             )}
 
             <View style={styles.switchContainer}>
-              <Text>{isPublic ? 'Publico' : 'Privado'}</Text>
+              <Text>{isPublic ? 'Público' : 'Privado'}</Text>
               <Switch value={isPublic} onValueChange={setIsPublic} />
             </View>
 
             <View style={styles.buttonsContainer}>
-              <Pressable style={styles.saveButton} onPress={handleSaveEvent}>
-                <Text style={styles.buttonText}>Save</Text>
+              <Pressable
+                style={styles.saveButton}
+                onPress={() => {
+                  if (location && selectedDate) {
+                    handleSaveEvent(
+                      title,
+                      description,
+                      selectedDate.toISOString().split('T')[0],
+                      selectedDate.toISOString().split('T')[1].slice(0, 5),
+                      isPublic,
+                      location.latitude,
+                      location.longitude
+                    );
+                  } else {
+                    alert('Preencha todos os campos');
+                  }
+                }}>
+                <Text style={styles.buttonText}>Salvar</Text>
               </Pressable>
               <Pressable style={styles.cancelButton} onPress={() => navigation.goBack()}>
-                <Text style={styles.buttonText}>Cancel</Text>
+                <Text style={styles.buttonText}>Cancelar</Text>
               </Pressable>
             </View>
           </View>
         </>
       ) : (
-        <MapView
-          style={styles.map}
-          onPress={handleMapPress} // Permite selecionar o ponto no mapa
-          initialRegion={{
-            latitude: -28.678, // Localização inicial (pode ser a atual do usuário)
-            longitude: -49.362,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          }}>
-          {location && (
-            <Marker
-              coordinate={{
-                latitude: location.latitude,
-                longitude: location.longitude,
-              }}
-            />
-          )}
-        </MapView>
+        <>
+          <MapView
+            style={styles.map}
+            onPress={handleMapPress}
+            initialRegion={{
+              latitude: UserLocation?.latitude || 0,
+              longitude: UserLocation?.longitude || 0,
+              latitudeDelta: 0.05,
+              longitudeDelta: 0.05,
+            }}>
+            {location && (
+              <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }} />
+            )}
+          </MapView>
+          <TouchableOpacity style={styles.fab} onPress={() => setIsMapVisible(false)}>
+            <Text style={styles.buttonText}>Fechar Mapa</Text>
+          </TouchableOpacity>
+        </>
       )}
     </View>
   );
@@ -222,8 +296,16 @@ const styles = StyleSheet.create({
   },
   switchContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+  },
+  fab: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    backgroundColor: '#00b9d1',
+    padding: 15,
+    borderRadius: 10,
   },
 });

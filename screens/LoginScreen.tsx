@@ -10,23 +10,18 @@ type LoginScreenProps = {
 };
 
 const LoginScreen = () => {
+  //Variavel para navegação
   const navigation = useNavigation<NavigationProp<LoginScreenProps>>();
+
+  //Variaveis de estilo
   const [usernameFocused, setUsernameFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
 
+  //Variaveis para armazenar os valores do usuario
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        navigation.navigate('Feed');
-      }
-    });
-
-    return () => unsubscribe();
-  }, [navigation]);
-
+  // Função para logar o usuário
   const handleLogin = (email: string, password: string) => {
     signInWithEmailAndPassword(auth, email, password)
       .then(() => {
