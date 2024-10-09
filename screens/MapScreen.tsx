@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     right: 20,
-    backgroundColor: '#2196F3',
+    backgroundColor: '#ff6f61', // Verde menta para o botão flutuante (FAB)
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -150,7 +150,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#ffffff', // Cor off-white para o fundo do carregamento
   },
 });
+
 
 export default MapScreen;

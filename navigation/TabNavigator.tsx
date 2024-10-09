@@ -34,7 +34,7 @@ const TabNavigator = () => {
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         headerShown: false,
-        tabBarActiveTintColor: '#00B9D1', // Cor ativa
+        tabBarActiveTintColor: '#ff6f61', // Cor ativa
         tabBarInactiveTintColor: 'gray', // Cor inativa
       })}>
       <Tab.Screen name="Mapa" component={MapStack} />

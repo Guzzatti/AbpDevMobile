@@ -244,7 +244,7 @@ export default AddEventModal;
 
 const styles = StyleSheet.create({
   modalContainer: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff', // Cor off-white
     borderRadius: 15,
     padding: 20,
     width: '100%',
@@ -254,10 +254,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 15,
     textAlign: 'center',
+    color: '#4a4a4a', // Cinza escuro para o título
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#d1d1d1', // Cinza claro para bordas
     padding: 12,
     borderRadius: 10,
     marginBottom: 20,
@@ -269,7 +270,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   saveButton: {
-    backgroundColor: '#00b9d1',
+    backgroundColor: '#6fcf97', // Verde menta para botões de ação
     padding: 15,
     borderRadius: 10,
     flex: 1,
@@ -277,14 +278,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#d9534f',
+    backgroundColor: '#ff6f61', // Cor principal para o botão de cancelamento
     padding: 15,
     borderRadius: 10,
     flex: 1,
     alignItems: 'center',
   },
   buttonText: {
-    color: 'white',
+    color: '#ffffff', // Texto branco para os botões
     fontWeight: '600',
     fontSize: 16,
   },
@@ -303,8 +304,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 20,
     right: 20,
-    backgroundColor: '#00b9d1',
+    backgroundColor: '#6fcf97', // Verde menta para botões de ação
     padding: 15,
     borderRadius: 10,
   },
 });
+

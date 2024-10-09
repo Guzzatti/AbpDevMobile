@@ -90,10 +90,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     marginBottom: 20,
+    color: '#4a4a4a', // Cinza escuro para o título
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#d1d1d1', // Cinza claro para a borda dos inputs
     padding: 12,
     borderRadius: 10,
     marginBottom: 20,
@@ -101,24 +102,26 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   inputSelected: {
-    borderColor: 'gray',
+    borderColor: '#4a4a4a', // Cinza escuro para o estado selecionado
   },
   button: {
-    backgroundColor: '#00B9D1',
+    backgroundColor: '#ff6f61', // Cor principal (coral) para o botão
     padding: 12,
     borderRadius: 10,
     width: '50%',
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#ffffff', // Texto branco no botão
     fontSize: 16,
   },
   loginText: {
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+    color: '#2d4059', // Azul escuro para o texto de login ou links
   },
 });
+
 
 export default LoginScreen;
