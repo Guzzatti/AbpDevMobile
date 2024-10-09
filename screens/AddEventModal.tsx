@@ -114,13 +114,13 @@ const AddEventModal = () => {
     setTimePickerVisibility(true);
   };
 
-  // Atualiza a data selecionada
+  // Atualiza a data selecionada e fecha o picker
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setDatePickerVisibility(false);
     if (selectedDate) setSelectedDate(selectedDate);
   };
 
-  // Atualiza a hora selecionada
+  // Atualiza a hora selecionada e fecha o picker
   const handleTimeChange = (event: any, selectedTime?: Date) => {
     setTimePickerVisibility(false);
     if (selectedTime && selectedDate) {
@@ -152,7 +152,7 @@ const AddEventModal = () => {
               onChangeText={setDescription}
             />
 
-            <Button title="Selecionar Data" onPress={()=>{showDatePicker()}} />
+            <Button title="Selecionar Data" onPress={showDatePicker} />
             {isDatePickerVisible && (
               <DateTimePicker
                 value={selectedDate || new Date()}
@@ -162,7 +162,7 @@ const AddEventModal = () => {
               />
             )}
 
-            <Button title="Selecionar Hora" onPress={()=>{showTimePicker()}} />
+            <Button title="Selecionar Hora" onPress={showTimePicker} />
             {isTimePickerVisible && (
               <DateTimePicker
                 value={selectedDate || new Date()}
@@ -223,10 +223,12 @@ const AddEventModal = () => {
             style={styles.map}
             onPress={handleMapPress}
             initialRegion={UserLocation as LocationType}>
-              {UserLocation && (
-                <Marker coordinate={{ latitude: UserLocation.latitude, longitude: UserLocation.longitude }} 
-                title='Sua Localização'/>
-              )}
+            {UserLocation && (
+              <Marker
+                coordinate={{ latitude: UserLocation.latitude, longitude: UserLocation.longitude }}
+                title="Sua Localização"
+              />
+            )}
             {location && (
               <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }} />
             )}
@@ -244,7 +246,7 @@ export default AddEventModal;
 
 const styles = StyleSheet.create({
   modalContainer: {
-    backgroundColor: '#ffffff', // Cor off-white
+    backgroundColor: '#ffffff',
     borderRadius: 15,
     padding: 20,
     width: '100%',
@@ -254,11 +256,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 15,
     textAlign: 'center',
-    color: '#4a4a4a', // Cinza escuro para o título
+    color: '#4a4a4a',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d1d1', // Cinza claro para bordas
+    borderColor: '#d1d1d1',
     padding: 12,
     borderRadius: 10,
     marginBottom: 20,
@@ -270,7 +272,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   saveButton: {
-    backgroundColor: '#6fcf97', // Verde menta para botões de ação
+    backgroundColor: '#6fcf97',
     padding: 15,
     borderRadius: 10,
     flex: 1,
@@ -278,35 +280,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#ff6f61', // Cor principal para o botão de cancelamento
+    backgroundColor: '#ff6f61',
     padding: 15,
     borderRadius: 10,
     flex: 1,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#ffffff', // Texto branco para os botões
+    color: '#fff',
     fontWeight: '600',
     fontSize: 16,
   },
   map: {
-    position: 'absolute',
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
+    ...StyleSheet.absoluteFillObject,
   },
   fab: {
     position: 'absolute',
-    top: 20,
+    bottom: 40,
     right: 20,
-    backgroundColor: '#6fcf97', // Verde menta para botões de ação
+    backgroundColor: '#ff6f61',
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 30,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
   },
 });
-
