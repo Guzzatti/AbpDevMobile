@@ -23,10 +23,6 @@ const FeedScreen = () => {
   };
 
 
-
-  const caioUid = 'lbmHl8mK9lNmV2DVHsIXee9COWp1';
-  const guzzatiUid = 'M6oJdXMtxVhjtxbD2MEVADpketY2';
-
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 10 }}>
       <Text>Feed Screen</Text>

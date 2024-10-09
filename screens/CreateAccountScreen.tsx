@@ -26,6 +26,10 @@ const CreateAccountScreen = () => {
     password2: string,
     username: string
   ) {
+if(!username || !email || !password1 || !password2){
+      alert('Preencha todos os campos');
+      return;
+    }
     if (password1 !== password2) {
       alert('As senhas não coincidem');
       return;
@@ -34,9 +38,6 @@ const CreateAccountScreen = () => {
       setLoading(true);
       const userCredential = await createUserWithEmailAndPassword(auth, email, password1);
       const user = userCredential.user;
-      if (!user) {
-        throw new Error('Erro ao criar usuário');
-      }
       await setDoc(doc(db, 'users', user.uid), {
         email: user.email,
         username,
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   registerText: {
-    width: '100%',
+    width: '100%', 
     justifyContent: 'center',
     alignItems: 'center',
   },
