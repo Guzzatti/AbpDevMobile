@@ -222,12 +222,11 @@ const AddEventModal = () => {
           <MapView
             style={styles.map}
             onPress={handleMapPress}
-            initialRegion={{
-              latitude: UserLocation?.latitude || 0,
-              longitude: UserLocation?.longitude || 0,
-              latitudeDelta: 0.05,
-              longitudeDelta: 0.05,
-            }}>
+            initialRegion={UserLocation as LocationType}>
+              {UserLocation && (
+                <Marker coordinate={{ latitude: UserLocation.latitude, longitude: UserLocation.longitude }} 
+                title='Sua Localização'/>
+              )}
             {location && (
               <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }} />
             )}

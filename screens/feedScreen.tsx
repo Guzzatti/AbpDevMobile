@@ -11,6 +11,7 @@ type FeedScreenProps = {
   Feed: undefined;
   Login: undefined;
   Configurações: undefined;
+  SearchScreen: undefined;
 };
 
 const FeedScreen = () => {
@@ -21,17 +22,11 @@ const FeedScreen = () => {
     });
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        navigation.navigate('Feed');
-      } else {
-        navigation.navigate('Login');
-      }
-    });
 
-    return () => unsubscribe();
-  }, [navigation]);
+
+  const caioUid = 'lbmHl8mK9lNmV2DVHsIXee9COWp1';
+  const guzzatiUid = 'M6oJdXMtxVhjtxbD2MEVADpketY2';
+
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 10 }}>
       <Text>Feed Screen</Text>
@@ -47,6 +42,20 @@ const FeedScreen = () => {
         }}>
         <Text>Sair da conta</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => navigation.navigate('SearchScreen')}
+        style={{
+          width: 100,
+          backgroundColor: 'white',
+          padding: 10,
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderRadius: 10,
+        }}>
+        <Text>Visualizar foto de perfil</Text>
+      </TouchableOpacity>
+
     </View>
   );
 };
