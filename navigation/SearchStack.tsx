@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../utils/firebase';
 import { View, ActivityIndicator } from 'react-native';
+import SearchScreen from 'screens/SearchScreen';
 
 const SearchStack = () => {
   const Stack = createStackNavigator();
@@ -32,7 +33,10 @@ const SearchStack = () => {
   return (
     <Stack.Navigator>
       {isLogged ? (
-        <Stack.Screen name="Feed" component={FeedScreen} />
+        <>
+          <Stack.Screen name="Feed" component={FeedScreen} />
+          <Stack.Screen name="SearchScreen" component={SearchScreen} />
+        </>
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
