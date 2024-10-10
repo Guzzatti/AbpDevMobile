@@ -3,6 +3,7 @@ import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { auth } from '../utils/firebase';
+import { ActivityIndicator } from 'react-native';
 
 type LoginScreenProps = {
   CreateAccount: undefined;
@@ -16,6 +17,7 @@ const LoginScreen = () => {
   //Variaveis de estilo
   const [usernameFocused, setUsernameFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   //Variaveis para armazenar os valores do usuario
   const [email, setEmail] = useState('');
@@ -23,13 +25,13 @@ const LoginScreen = () => {
 
   // Função para logar o usuário
   const handleLogin = (email: string, password: string) => {
+    setLoading(true);
     signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        // O usuário está logado, a navegação será tratada por onAuthStateChanged e useEffect
-        // deixei só para você saber
-      })
       .catch((error) => {
         console.error('Erro ao logar', error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -59,6 +61,7 @@ const LoginScreen = () => {
         onPress={() => {
           handleLogin(email, password);
         }}>
+        {loading ? <ActivityIndicator size="small" color="#fff" /> : ''}
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
       <View
@@ -110,6 +113,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: '50%',
     alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 5,
   },
   buttonText: {
     color: '#ffffff', // Texto branco no botão
@@ -122,6 +128,5 @@ const styles = StyleSheet.create({
     color: '#2d4059', // Azul escuro para o texto de login ou links
   },
 });
-
 
 export default LoginScreen;

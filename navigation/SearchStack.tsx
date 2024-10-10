@@ -8,6 +8,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../utils/firebase';
 import { View, ActivityIndicator } from 'react-native';
 import SearchScreen from 'screens/SearchScreen';
+import { TransitionPresets } from '@react-navigation/stack';
 
 const SearchStack = () => {
   const Stack = createStackNavigator();
@@ -22,7 +23,6 @@ const SearchStack = () => {
   }, []);
 
   if (isLogged === null) {
-    // Mostre um loading enquanto verifica se o usuário está logado
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#0000ff" />
@@ -31,7 +31,7 @@ const SearchStack = () => {
   }
 
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ ...TransitionPresets.SlideFromRightIOS }}>
       {isLogged ? (
         <>
           <Stack.Screen name="Feed" component={FeedScreen} />

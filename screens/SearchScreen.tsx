@@ -1,12 +1,13 @@
 // screens/SearchScreen.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from 'utils/firebase'; // Certifique-se de que o Firebase está configurado corretamente
 
 const SearchScreen = () => {
   const [userName, setUserName] = useState<string | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -15,6 +16,7 @@ const SearchScreen = () => {
 
         if (!user) {
           Alert.alert('Erro', 'Usuário não autenticado.');
+          setLoading(false);
           return;
         }
 
@@ -32,6 +34,8 @@ const SearchScreen = () => {
       } catch (error) {
         console.error('Erro ao buscar dados do usuário:', error);
         Alert.alert('Erro', 'Não foi possível carregar os dados do usuário.');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -41,12 +45,19 @@ const SearchScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Perfil do Usuário</Text>
-      {profileImageUrl ? (
-        <Image source={{ uri: profileImageUrl }} style={styles.userImage} />
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        <Text>Sem foto</Text>
+        <>
+          {profileImageUrl ? (
+            <Image source={{ uri: profileImageUrl }} style={styles.userImage} />
+          ) : (
+            <Text>Sem foto</Text>
+          )}
+          <Text style={styles.userName}>{userName}</Text>
+        </>
       )}
-      <Text style={styles.userName}>{userName}</Text>
     </View>
   );
 };

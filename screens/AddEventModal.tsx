@@ -6,16 +6,20 @@ import {
   StyleSheet,
   TextInput,
   Button,
-  Dimensions,
   Switch,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import MapView, { Marker, MapPressEvent } from 'react-native-maps';
 import * as Location from 'expo-location';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DatePicker from 'components/DatePicker';
+import TimePicker from 'components/TimePicker';
+import LocationPicker from 'components/LocationPicker';
 import { auth, db } from 'utils/firebase';
+import Entypo from '@expo/vector-icons/Entypo';
 import { collection, addDoc } from 'firebase/firestore';
+import LocationText from 'components/LocationText';
 
 type RootStackParamList = {};
 
@@ -30,6 +34,7 @@ const AddEventModal = () => {
   const [UserLocation, setUserLocation] = useState<LocationType | null>(null);
   const user = auth.currentUser;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const [loading, setLoading] = useState(false);
 
   // Variáveis para coleta dos dados
   const [title, setTitle] = useState<string>('');
@@ -40,6 +45,7 @@ const AddEventModal = () => {
 
   // Picker states
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<Date | null>(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
 
@@ -93,7 +99,7 @@ const AddEventModal = () => {
       isPublic,
       user: user?.uid,
     };
-
+    setLoading(true);
     addDoc(collection(db, 'events'), event)
       .then(() => {
         alert('Evento salvo com sucesso');
@@ -101,34 +107,10 @@ const AddEventModal = () => {
       })
       .catch((error) => {
         alert('Erro ao salvar evento');
+      })
+      .finally(() => {
+        setLoading(false);
       });
-  };
-
-  // Função para mostrar o picker de data
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
-
-  // Função para mostrar o picker de hora
-  const showTimePicker = () => {
-    setTimePickerVisibility(true);
-  };
-
-  // Atualiza a data selecionada e fecha o picker
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    setDatePickerVisibility(false);
-    if (selectedDate) setSelectedDate(selectedDate);
-  };
-
-  // Atualiza a hora selecionada e fecha o picker
-  const handleTimeChange = (event: any, selectedTime?: Date) => {
-    setTimePickerVisibility(false);
-    if (selectedTime && selectedDate) {
-      const updatedDate = new Date(selectedDate);
-      updatedDate.setHours(selectedTime.getHours());
-      updatedDate.setMinutes(selectedTime.getMinutes());
-      setSelectedDate(updatedDate);
-    }
   };
 
   return (
@@ -152,39 +134,26 @@ const AddEventModal = () => {
               onChangeText={setDescription}
             />
 
-            <Button title="Selecionar Data" onPress={showDatePicker} />
-            {isDatePickerVisible && (
-              <DateTimePicker
-                value={selectedDate || new Date()}
-                mode="date"
-                display="spinner"
-                onChange={handleDateChange}
-              />
-            )}
+            <DatePicker
+              date={selectedDate}
+              setDate={setSelectedDate}
+              isVisible={isDatePickerVisible}
+              setVisibility={setDatePickerVisibility}
+            />
 
-            <Button title="Selecionar Hora" onPress={showTimePicker} />
-            {isTimePickerVisible && (
-              <DateTimePicker
-                value={selectedDate || new Date()}
-                mode="time"
-                display="spinner"
-                is24Hour={true}
-                onChange={handleTimeChange}
-              />
-            )}
+            <TimePicker
+              time={selectedTime}
+              setTime={setSelectedTime}
+              isVisible={isTimePickerVisible}
+              setVisibility={setTimePickerVisibility}
+            />
 
-            <Text>
-              {selectedDate
-                ? `Data e Hora Selecionada: ${selectedDate.toLocaleDateString('pt-br')} ${selectedDate.toLocaleTimeString('pt-br')}`
-                : 'Nenhuma data e hora selecionada'}
-            </Text>
-
-            <Button title="Selecionar Localização no Mapa" onPress={() => setIsMapVisible(true)} />
-            {location && (
-              <Text>
-                Localização Selecionada: {location.latitude}, {location.longitude}
-              </Text>
-            )}
+            <View style={styles.buttonLocation}>
+              <LocationText location={location} />
+              <TouchableOpacity style={styles.button} onPress={() => setIsMapVisible(true)}>
+                <Entypo name="location" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
 
             <View style={styles.switchContainer}>
               <Text>{isPublic ? 'Público' : 'Privado'}</Text>
@@ -212,31 +181,19 @@ const AddEventModal = () => {
                     alert('Preencha todos os campos');
                   }
                 }}>
+                {loading ? <ActivityIndicator size="small" color="#fff" /> : ''}
                 <Text style={styles.buttonText}>Salvar</Text>
               </Pressable>
             </View>
           </View>
         </>
       ) : (
-        <>
-          <MapView
-            style={styles.map}
-            onPress={handleMapPress}
-            initialRegion={UserLocation as LocationType}>
-            {UserLocation && (
-              <Marker
-                coordinate={{ latitude: UserLocation.latitude, longitude: UserLocation.longitude }}
-                title="Sua Localização"
-              />
-            )}
-            {location && (
-              <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }} />
-            )}
-          </MapView>
-          <TouchableOpacity style={styles.fab} onPress={() => setIsMapVisible(false)}>
-            <Text style={styles.buttonText}>Fechar Mapa</Text>
-          </TouchableOpacity>
-        </>
+        <LocationPicker
+          UserLocation={UserLocation}
+          location={location}
+          setIsMapVisible={setIsMapVisible}
+          handleMapPress={handleMapPress}
+        />
       )}
     </View>
   );
@@ -250,6 +207,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     width: '100%',
+    gap: 10,
   },
   modalTitle: {
     fontSize: 24,
@@ -270,6 +228,7 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 10,
   },
   saveButton: {
     backgroundColor: '#6fcf97',
@@ -278,6 +237,9 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 5,
   },
   cancelButton: {
     backgroundColor: '#ff6f61',
@@ -307,5 +269,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 20,
+  },
+  button: {
+    backgroundColor: '#ff6f61',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  buttonLocation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  textLocation: {
+    fontWeight: '600',
+    fontSize: 16,
   },
 });

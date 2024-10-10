@@ -1,8 +1,7 @@
-import { createStackNavigator } from "@react-navigation/stack";
-import { TransitionPresets } from "@react-navigation/stack";
-import MapScreen from "../screens/MapScreen";
-import AddEventModal from "../screens/AddEventModal";
-
+import { createStackNavigator } from '@react-navigation/stack';
+import { TransitionPresets } from '@react-navigation/stack';
+import MapScreen from '../screens/MapScreen';
+import AddEventModal from '../screens/AddEventModal';
 
 const Stack = createStackNavigator();
 
