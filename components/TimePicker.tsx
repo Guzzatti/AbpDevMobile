@@ -1,28 +1,29 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { View, Text, TouchableOpacity } from 'react-native';
+import DateTimePicker, { Event } from '@react-native-community/datetimepicker';
+import Fontisto from '@expo/vector-icons/Fontisto';
 import { StyleSheet } from 'react-native';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
 type TimePickerProps = {
   time: Date | null;
-  setTime: (date: Date) => void;
+  setTime: (time: Date) => void;
   isVisible: boolean;
   setVisibility: (visible: boolean) => void;
 };
 
 const TimePicker: React.FC<TimePickerProps> = ({ time, setTime, isVisible, setVisibility }) => {
-  const handleTimeChange = (event: any, selectedTime?: Date) => {
-    setVisibility(false);
-    if (selectedTime) setTime(selectedTime);
+  const handleTimeChange = (event: Event, selectedTime?: Date) => {
+    if (selectedTime) {
+      setTime(selectedTime); // Atualiza o horário sem fechar o DateTimePicker
+    }
+  };
+
+  const toggleVisibility = () => {
+    setVisibility(!isVisible); // Abre ou fecha o DateTimePicker ao clicar no botão do relógio
   };
 
   const formatTime = (time: Date) => {
-    const hour = time.getHours().toString().padStart(2, '0');
-    const minutes = time.getMinutes().toString().padStart(2, '0');
-
-    return `${hour}:${minutes}`;
+    return time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -30,17 +31,17 @@ const TimePicker: React.FC<TimePickerProps> = ({ time, setTime, isVisible, setVi
       {time ? (
         <Text style={styles.buttonText}>{formatTime(time)}</Text>
       ) : (
-        <Text style={styles.buttonText}>Selecione a hora</Text>
+        <Text style={styles.buttonText}>Selecione o horário</Text>
       )}
-      <TouchableOpacity style={styles.button} onPress={() => setVisibility(true)}>
-        <AntDesign name="clockcircleo" size={24} color="black" />
+      <TouchableOpacity style={styles.button} onPress={toggleVisibility}>
+        <Fontisto name="clock" size={24} color="black" />
       </TouchableOpacity>
       {isVisible && (
         <DateTimePicker
           value={time || new Date()}
-          mode="time"
+          mode="time" // Modo de seleção de horário
           display="default"
-          onChange={handleTimeChange}
+          onChange={handleTimeChange} // Altera o horário sem fechar o picker
         />
       )}
     </View>

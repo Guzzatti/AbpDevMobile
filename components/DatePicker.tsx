@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { Event } from '@react-native-community/datetimepicker';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { StyleSheet } from 'react-native';
 
@@ -12,9 +12,14 @@ type DatePickerProps = {
 };
 
 const DatePicker: React.FC<DatePickerProps> = ({ date, setDate, isVisible, setVisibility }) => {
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    setVisibility(false);
-    if (selectedDate) setDate(selectedDate);
+  const handleDateChange = (event: Event, selectedDate?: Date) => {
+    if (selectedDate) {
+      setDate(selectedDate); // Atualiza a data sem fechar o DateTimePicker
+    }
+  };
+
+  const toggleVisibility = () => {
+    setVisibility(!isVisible); // Abre ou fecha o DateTimePicker ao clicar no botão do calendário
   };
 
   const formatDate = (date: Date) => {
@@ -28,7 +33,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ date, setDate, isVisible, setVi
       ) : (
         <Text style={styles.buttonText}>Selecione a data</Text>
       )}
-      <TouchableOpacity style={styles.button} onPress={() => setVisibility(true)}>
+      <TouchableOpacity style={styles.button} onPress={toggleVisibility}>
         <Fontisto name="date" size={24} color="black" />
       </TouchableOpacity>
       {isVisible && (
@@ -36,7 +41,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ date, setDate, isVisible, setVi
           value={date || new Date()}
           mode="date"
           display="default"
-          onChange={handleDateChange}
+          onChange={handleDateChange} // Altera a data sem fechar o picker
         />
       )}
     </View>
