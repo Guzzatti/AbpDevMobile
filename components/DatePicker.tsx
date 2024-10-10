@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import DateTimePicker, { Event } from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { StyleSheet } from 'react-native';
 
@@ -12,7 +12,7 @@ type DatePickerProps = {
 };
 
 const DatePicker: React.FC<DatePickerProps> = ({ date, setDate, isVisible, setVisibility }) => {
-  const handleDateChange = (event: Event, selectedDate?: Date) => {
+  const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (selectedDate) {
       setDate(selectedDate); // Atualiza a data sem fechar o DateTimePicker
     }
