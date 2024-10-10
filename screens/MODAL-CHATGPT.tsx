@@ -1,3 +1,4 @@
+// aqui o datetimepicker esta beeeeeem melhor, mas tem que adaptar com o arquivo original AddEventModal.tsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -6,12 +7,10 @@ import {
   StyleSheet,
   TextInput,
   Button,
-  Dimensions,
   Switch,
-  TouchableOpacity,
 } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import MapView, { Marker, MapPressEvent } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { auth, db } from 'utils/firebase';
@@ -31,7 +30,6 @@ const AddEventModal = () => {
   const user = auth.currentUser;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-  // Variáveis para coleta dos dados
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [isMapVisible, setIsMapVisible] = useState(false);
@@ -43,7 +41,6 @@ const AddEventModal = () => {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
 
-  // Função para pegar a localização do usuário
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -61,13 +58,6 @@ const AddEventModal = () => {
       });
     })();
   }, []);
-
-  // Atualiza a localização ao pressionar um ponto no mapa
-  const handleMapPress = (event: MapPressEvent) => {
-    const { latitude, longitude } = event.nativeEvent.coordinate;
-    setLocation({ latitude, longitude });
-    setIsMapVisible(false);
-  };
 
   // Função para salvar evento
   const handleSaveEvent = (
@@ -104,31 +94,27 @@ const AddEventModal = () => {
       });
   };
 
-  // Função para mostrar o picker de data
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
-
-  // Função para mostrar o picker de hora
-  const showTimePicker = () => {
-    setTimePickerVisibility(true);
-  };
-
-  // Atualiza a data selecionada e fecha o picker
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setDatePickerVisibility(false);
-    if (selectedDate) setSelectedDate(selectedDate);
+    if (selectedDate) {
+      setSelectedDate(selectedDate);
+    }
   };
 
-  // Atualiza a hora selecionada e fecha o picker
   const handleTimeChange = (event: any, selectedTime?: Date) => {
-    setTimePickerVisibility(false);
     if (selectedTime && selectedDate) {
       const updatedDate = new Date(selectedDate);
       updatedDate.setHours(selectedTime.getHours());
       updatedDate.setMinutes(selectedTime.getMinutes());
       setSelectedDate(updatedDate);
     }
+  };
+
+  const confirmDateSelection = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const confirmTimeSelection = () => {
+    setTimePickerVisibility(false);
   };
 
   return (
@@ -152,25 +138,31 @@ const AddEventModal = () => {
               onChangeText={setDescription}
             />
 
-            <Button title="Selecionar Data" onPress={showDatePicker} />
+            <Button title="Selecionar Data" onPress={() => setDatePickerVisibility(true)} />
             {isDatePickerVisible && (
               <DateTimePicker
                 value={selectedDate || new Date()}
                 mode="date"
-                display="spinner"
+                display="default"
                 onChange={handleDateChange}
               />
             )}
+            {isDatePickerVisible && (
+              <Button title="Confirmar Data" onPress={confirmDateSelection} />
+            )}
 
-            <Button title="Selecionar Hora" onPress={showTimePicker} />
+            <Button title="Selecionar Hora" onPress={() => setTimePickerVisibility(true)} />
             {isTimePickerVisible && (
               <DateTimePicker
                 value={selectedDate || new Date()}
                 mode="time"
-                display="spinner"
+                display="default"
                 is24Hour={true}
                 onChange={handleTimeChange}
               />
+            )}
+            {isTimePickerVisible && (
+              <Button title="Confirmar Hora" onPress={confirmTimeSelection} />
             )}
 
             <Text>
@@ -221,7 +213,11 @@ const AddEventModal = () => {
         <>
           <MapView
             style={styles.map}
-            onPress={handleMapPress}
+            onPress={(event) => {
+              const { latitude, longitude } = event.nativeEvent.coordinate;
+              setLocation({ latitude, longitude });
+              setIsMapVisible(false);
+            }}
             initialRegion={UserLocation as LocationType}>
             {UserLocation && (
               <Marker
@@ -233,9 +229,9 @@ const AddEventModal = () => {
               <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }} />
             )}
           </MapView>
-          <TouchableOpacity style={styles.fab} onPress={() => setIsMapVisible(false)}>
+          <Pressable style={styles.fab} onPress={() => setIsMapVisible(false)}>
             <Text style={styles.buttonText}>Fechar Mapa</Text>
-          </TouchableOpacity>
+          </Pressable>
         </>
       )}
     </View>
@@ -260,52 +256,52 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d1d1',
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 20,
-    fontSize: 16,
-    width: '100%',
+    borderColor: '#ccc',
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
   },
   buttonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   saveButton: {
-    backgroundColor: '#6fcf97',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#4caf50',
+    padding: 10,
+    borderRadius: 5,
     flex: 1,
-    marginRight: 10,
     alignItems: 'center',
+    marginHorizontal: 5,
   },
   cancelButton: {
-    backgroundColor: '#ff6f61',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#f44336',
+    padding: 10,
+    borderRadius: 5,
     flex: 1,
     alignItems: 'center',
+    marginHorizontal: 5,
   },
   buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
+    color: '#ffffff',
+    fontWeight: 'bold',
   },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
   },
   fab: {
     position: 'absolute',
-    bottom: 40,
     right: 20,
-    backgroundColor: '#ff6f61',
+    bottom: 20,
+    backgroundColor: '#6200ee',
+    borderRadius: 50,
     padding: 15,
-    borderRadius: 30,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
+    elevation: 8,
   },
 });
