@@ -90,7 +90,7 @@ const MapScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#ff6f61" />
       </View>
     );
   }
