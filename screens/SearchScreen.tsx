@@ -47,7 +47,7 @@ const SearchScreen = () => {
       <Text style={styles.title}>Perfil do Usuário</Text>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#ff6f61" />
       ) : (
         <>
           {profileImageUrl ? (
