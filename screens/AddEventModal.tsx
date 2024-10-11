@@ -118,15 +118,6 @@ const AddEventModal = () => {
       user: user?.uid,
       images,
     };
-    setLoading(true);
-    addDoc(collection(db, 'events'), event)
-      .then(() => {
-        alert('Evento salvo com sucesso');
-        navigation.goBack();
-      })
-      .catch((error) => {
-        alert('Erro ao salvar evento');
-      });
 
     uploadImages(images).then((urls) => {
       addDoc(collection(db, 'events'), { ...event, images: urls })
