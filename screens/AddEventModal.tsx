@@ -118,6 +118,7 @@ const AddEventModal = () => {
       user: user?.uid,
       images,
     };
+    setLoading(true);
 
     uploadImages(images).then((urls) => {
       addDoc(collection(db, 'events'), { ...event, images: urls })
