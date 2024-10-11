@@ -27,13 +27,10 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
       <MapView
         style={styles.map}
         onPress={handleMapPress}
-        initialRegion={UserLocation as LocationType}>
-        {UserLocation && (
-          <Marker
-            coordinate={{ latitude: UserLocation.latitude, longitude: UserLocation.longitude }}
-            title="Sua Localização"
-          />
-        )}
+        initialRegion={UserLocation as LocationType}
+        showsUserLocation={true}
+        
+        >
         {location && (
           <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }} />
         )}

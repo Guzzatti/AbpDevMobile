@@ -6,7 +6,6 @@ import { StatusBar } from 'expo-status-bar';
 export default function App() {
   return (
     <NavigationContainer>
-      {/* Aquela barrinha la em cima que mostra as horas dados da bateria talz */}
       <StatusBar style="auto" />
       <TabNavigator />
     </NavigationContainer>

@@ -7,4 +7,5 @@ export type Event = {
     latitude: number;
     longitude: number;
     // Adicione outras propriedades que possam ser necessárias
+    images?: string[]; // Array de URLs de imagens
 };

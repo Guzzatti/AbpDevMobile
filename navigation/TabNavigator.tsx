@@ -11,8 +11,7 @@ const Tab = createBottomTabNavigator();
 const TabNavigator = () => {
   return (
     <Tab.Navigator
-      screenOptions={
-        ({ route }) => ({
+      screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'map'; // Valor padrão
 
@@ -33,6 +32,7 @@ const TabNavigator = () => {
           // Retorna o ícone do Ionicons baseado no nome da rota
           return <Ionicons name={iconName} size={size} color={color} />;
         },
+        tabBarLabel: () => null, // Remove os nomes das abas
         headerShown: false,
         tabBarActiveTintColor: '#ff6f61', // Cor ativa
         tabBarInactiveTintColor: 'gray', // Cor inativa

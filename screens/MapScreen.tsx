@@ -18,6 +18,7 @@ type LocationType = {
 
 type RootStackParamList = {
   AddEventModal: undefined;
+  Login: undefined;
 };
 
 const MapScreen = () => {
@@ -83,7 +84,7 @@ const MapScreen = () => {
     if (auth.currentUser) {
       navigation.navigate('AddEventModal');
     } else {
-      alert('Você precisa estar logado para criar um evento');
+      alert('Você precisa estar logado para adicionar um evento');
     }
   };
 
@@ -95,11 +96,20 @@ const MapScreen = () => {
     );
   }
 
+  const user = auth.currentUser;
+
   return (
     <View style={styles.container}>
       {location ? (
-        <MapView style={styles.map} initialRegion={location as Region} showsUserLocation={true}>
-          <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }} />
+        <MapView
+          style={styles.map}
+          initialRegion={location as Region}
+          showsUserLocation={true}
+          showsMyLocationButton={true} // Desabilita o botão de localização
+          showsCompass={true} // Desabilita a bússola
+          toolbarEnabled={false} // Desabilita a toolbar
+          zoomControlEnabled={false} // Desabilita o controle de zoom
+        >
           {events.map((event) => (
             <Marker
               key={event.id}
@@ -113,8 +123,12 @@ const MapScreen = () => {
       ) : null}
 
       {/* Botão de adicionar evento */}
-      <TouchableOpacity style={styles.fab} onPress={() => navModal()}>
-        <Ionicons name="add" size={30} color="white" />
+      <TouchableOpacity style={styles.fab} onPress={() => navModal()} disabled={!user}>
+        {user ? (
+          <Ionicons name="add" size={30} color="#fff" />
+        ) : (
+          <ActivityIndicator size="small" color="#fff" />
+        )}
       </TouchableOpacity>
 
       {/* Modal para exibir informações do evento */}
@@ -153,6 +167,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff', // Cor off-white para o fundo do carregamento
   },
 });
-
 
 export default MapScreen;

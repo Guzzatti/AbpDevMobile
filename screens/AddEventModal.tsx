@@ -20,7 +20,10 @@ import { auth, db } from 'utils/firebase';
 import Entypo from '@expo/vector-icons/Entypo';
 import { collection, addDoc } from 'firebase/firestore';
 import LocationText from 'components/LocationText';
-
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 type RootStackParamList = {};
 
 type LocationType = {
@@ -35,6 +38,7 @@ const AddEventModal = () => {
   const user = auth.currentUser;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
 
   // Variáveis para coleta dos dados
   const [title, setTitle] = useState<string>('');
@@ -75,6 +79,19 @@ const AddEventModal = () => {
     setIsMapVisible(false);
   };
 
+  const uploadImages = async (images: string[]) => {
+    const urls: string[] = [];
+    for (let i = 0; i < images.length; i++) {
+      const response = await fetch(images[i]);
+      const blob = await response.blob();
+      const storageRef = ref(getStorage(), `events/${user?.uid}/${Date.now()}.jpg`);
+      await uploadBytes(storageRef, blob);
+      const url = await getDownloadURL(storageRef);
+      urls.push(url);
+    }
+    return urls;
+  };
+
   // Função para salvar evento
   const handleSaveEvent = (
     title: string,
@@ -83,7 +100,8 @@ const AddEventModal = () => {
     time: string,
     isPublic: boolean,
     latitude: number,
-    longitude: number
+    longitude: number,
+    images: string[]
   ) => {
     if (!user) {
       alert('Necessário estar logado para criar um evento');
@@ -98,6 +116,7 @@ const AddEventModal = () => {
       longitude,
       isPublic,
       user: user?.uid,
+      images,
     };
     setLoading(true);
     addDoc(collection(db, 'events'), event)
@@ -107,10 +126,32 @@ const AddEventModal = () => {
       })
       .catch((error) => {
         alert('Erro ao salvar evento');
-      })
-      .finally(() => {
-        setLoading(false);
       });
+
+    uploadImages(images).then((urls) => {
+      addDoc(collection(db, 'events'), { ...event, images: urls })
+        .then(() => {
+          alert('Evento salvo com sucesso');
+          navigation.goBack();
+        })
+        .catch((error) => {
+          alert('Erro ao salvar evento');
+        })
+        .finally(() => setLoading(false));
+    });
+  };
+
+  const pickerImages = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      let selectedImages = result.assets?.map((asset) => asset.uri) || [];
+      setImages([...images, ...selectedImages]);
+    }
   };
 
   return (
@@ -151,15 +192,39 @@ const AddEventModal = () => {
             <View style={styles.buttonLocation}>
               <LocationText location={location} />
               <TouchableOpacity style={styles.button} onPress={() => setIsMapVisible(true)}>
-                <Entypo name="location" size={24} color="black" />
+                <Entypo name="location" size={24} color="white" />
               </TouchableOpacity>
             </View>
 
             <View style={styles.switchContainer}>
               <Text>{isPublic ? 'Público' : 'Privado'}</Text>
-              <Switch value={isPublic} onValueChange={setIsPublic} />
+
+              <Switch
+                thumbColor={isPublic ? '#ffffff' : '#f4f3f4'}
+                trackColor={{ true: '#ff6f61', false: '#f4f3f4' }}
+                value={isPublic}
+                onValueChange={setIsPublic}
+              />
             </View>
 
+            <TouchableOpacity style={styles.button} onPress={pickerImages}>
+              <Text style={styles.buttonText}>Adicionar Imagem</Text>
+            </TouchableOpacity>
+
+            <View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ alignItems: 'center', gap: 10 }}>
+                {images.map((image, index) => (
+                  <Image
+                    key={index}
+                    source={{ uri: image }}
+                    style={{ width: 100, height: 100, borderRadius: 10 }}
+                  />
+                ))}
+              </ScrollView>
+            </View>
             <View style={styles.buttonsContainer}>
               <Pressable style={styles.cancelButton} onPress={() => navigation.goBack()}>
                 <Text style={styles.buttonText}>Cancelar</Text>
@@ -175,7 +240,8 @@ const AddEventModal = () => {
                       selectedDate.toISOString().split('T')[1].slice(0, 5),
                       isPublic,
                       location.latitude,
-                      location.longitude
+                      location.longitude,
+                      images
                     );
                   } else {
                     alert('Preencha todos os campos');
@@ -212,7 +278,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: '600',
-    marginBottom: 15,
     textAlign: 'center',
     color: '#4a4a4a',
   },
@@ -221,7 +286,7 @@ const styles = StyleSheet.create({
     borderColor: '#d1d1d1',
     padding: 12,
     borderRadius: 10,
-    marginBottom: 20,
+
     fontSize: 16,
     width: '100%',
   },
@@ -235,7 +300,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     flex: 1,
-    marginRight: 10,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
@@ -268,7 +332,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
   },
   button: {
     backgroundColor: '#ff6f61',

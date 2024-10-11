@@ -28,7 +28,7 @@ const LoginScreen = () => {
     setLoading(true);
     signInWithEmailAndPassword(auth, email, password)
       .catch((error) => {
-        console.error('Erro ao logar', error);
+        alert("Erro ao logar, verifique suas credenciais");
       })
       .finally(() => {
         setLoading(false);
