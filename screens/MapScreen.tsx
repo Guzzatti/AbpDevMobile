@@ -4,22 +4,10 @@ import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import EventModal from '../components/EventModal'; // Importe o novo componente de modal
-import { Event } from '../types'; // Importando o tipo Event
+import { Event, RootStackParamList, LocationType } from '../types'; // Importando o tipo Event
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { auth, db } from '../utils/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
-
-type LocationType = {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-};
-
-type RootStackParamList = {
-  AddEventModal: undefined;
-  Login: undefined;
-};
 
 const MapScreen = () => {
   // Variáveis de estilo

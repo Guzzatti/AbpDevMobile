@@ -1,18 +1,14 @@
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
-import { useState, useEffect } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { auth } from '../utils/firebase';
 import { ActivityIndicator } from 'react-native';
-
-type LoginScreenProps = {
-  CreateAccount: undefined;
-  Feed: undefined;
-};
+import { RootStackParamList } from 'types';
 
 const LoginScreen = () => {
   //Variavel para navegação
-  const navigation = useNavigation<NavigationProp<LoginScreenProps>>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   //Variaveis de estilo
   const [usernameFocused, setUsernameFocused] = useState(false);
@@ -28,7 +24,7 @@ const LoginScreen = () => {
     setLoading(true);
     signInWithEmailAndPassword(auth, email, password)
       .catch((error) => {
-        alert("Erro ao logar, verifique suas credenciais");
+        alert('Erro ao logar, verifique suas credenciais');
       })
       .finally(() => {
         setLoading(false);
@@ -64,17 +60,9 @@ const LoginScreen = () => {
         {loading ? <ActivityIndicator size="small" color="#fff" /> : ''}
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
-      <View
-        style={{
-          width: '100%',
-          alignItems: 'center',
-          flexDirection: 'row',
-          justifyContent: 'center',
-          gap: 20,
-          marginTop: 10,
-        }}>
+      <View style={styles.bottomView}>
         <Text>Não tem uma conta?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
+        <TouchableOpacity onPress={() => navigation.navigate('CreateAccountScreen')}>
           <Text>Criar uma conta</Text>
         </TouchableOpacity>
       </View>
@@ -126,6 +114,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     color: '#2d4059', // Azul escuro para o texto de login ou links
+  },
+  bottomView: {
+    width: '100%',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 20,
+    marginTop: 10,
   },
 });
 

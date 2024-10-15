@@ -5,7 +5,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from 'utils/firebase'; // Certifique-se de que o Firebase está configurado corretamente
 
-export default function SettingsScreen() {
+export default function EditProfileScreen() {
   const [image, setImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
 

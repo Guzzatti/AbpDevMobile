@@ -1,14 +1,31 @@
-// navigation/tab-navigator.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { Keyboard } from 'react-native';
 import SearchStack from './SearchStack';
-import SettingsScreen from '../screens/SettingsScreen';
 import MapStack from './MapStack';
+import FeedStack from './FeedStack';
+import ProfileStack from './ProfileStack';
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -16,14 +33,17 @@ const TabNavigator = () => {
           let iconName: keyof typeof Ionicons.glyphMap = 'map'; // Valor padrão
 
           switch (route.name) {
-            case 'Mapa':
+            case 'MapStack':
               iconName = focused ? 'map' : 'map-outline';
               break;
-            case 'Pesquisar':
+            case 'FeedStack':
+              iconName = focused ? 'home' : 'home-outline';
+              break;
+            case 'SearchStack':
               iconName = focused ? 'search' : 'search-outline';
               break;
-            case 'Configurações':
-              iconName = focused ? 'settings' : 'settings-outline';
+            case 'ProfileStack':
+              iconName = focused ? 'person' : 'person-outline';
               break;
             default:
               iconName = 'map';
@@ -36,10 +56,12 @@ const TabNavigator = () => {
         headerShown: false,
         tabBarActiveTintColor: '#ff6f61', // Cor ativa
         tabBarInactiveTintColor: 'gray', // Cor inativa
+        tabBarStyle: { display: isKeyboardVisible ? 'none' : 'flex' }, // Oculta a tab bar quando o teclado está visível
       })}>
-      <Tab.Screen name="Mapa" component={MapStack} />
-      <Tab.Screen name="Pesquisar" component={SearchStack} />
-      <Tab.Screen name="Configurações" component={SettingsScreen} />
+      <Tab.Screen name="MapStack" component={MapStack} />
+      <Tab.Screen name="FeedStack" component={FeedStack} />
+      <Tab.Screen name="SearchStack" component={SearchStack} />
+      <Tab.Screen name="ProfileStack" component={ProfileStack} />
     </Tab.Navigator>
   );
 };

@@ -1,7 +1,6 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import SearchScreen from 'screens/SearchScreen';
-import SelectedUserProfile from 'screens/SelectedUserProfile';
-import { TransitionPresets } from '@react-navigation/stack';
+import ProfileScreen from 'screens/MyProfileScreen';
+import EditProfileScreen from 'screens/EditProfileScreen';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -9,10 +8,10 @@ import { auth } from '../utils/firebase';
 import { View, ActivityIndicator } from 'react-native';
 import LoginScreen from 'screens/LoginScreen';
 import CreateAccountScreen from 'screens/CreateAccountScreen';
+import { TransitionPresets } from '@react-navigation/stack';
 
-const SearchStack = () => {
+function ProfileStack() {
   const Stack = createStackNavigator();
-
   const [isLogged, setIsLogged] = useState<boolean | null>(null); // null indicates loading
 
   useEffect(() => {
@@ -37,17 +36,17 @@ const SearchStack = () => {
       initialRouteName={isLogged ? 'SearchScreen' : 'LoginScreen'}>
       {isLogged ? (
         <>
-          <Stack.Screen name="SearchScreen" component={SearchScreen} />
-          <Stack.Screen name="SelectedUserProfile" component={SelectedUserProfile} />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
         </>
       ) : (
         <>
-          <Stack.Screen name="LoginScreen" component={LoginScreen} />
+          <Stack.Screen name="LoginSreen" component={LoginScreen} />
           <Stack.Screen name="CreateAccountScreen" component={CreateAccountScreen} />
         </>
       )}
     </Stack.Navigator>
   );
-};
+}
 
-export default SearchStack;
+export default ProfileStack;

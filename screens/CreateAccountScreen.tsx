@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import { auth } from '../utils/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { setDoc, doc } from 'firebase/firestore';
@@ -26,8 +33,12 @@ const CreateAccountScreen = () => {
     password2: string,
     username: string
   ) {
-if(!username || !email || !password1 || !password2){
+    if (!username || !email || !password1 || !password2) {
       alert('Preencha todos os campos');
+      return;
+    }
+    if (username.length < 2) {
+      alert('Username precisa ter pelo menos 2 caracteres');
       return;
     }
     if (password1 !== password2) {
@@ -139,7 +150,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   registerText: {
-    width: '100%', 
+    width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
     color: '#2d4059', // Azul escuro para texto de registro ou links

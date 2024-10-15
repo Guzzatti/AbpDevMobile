@@ -5,13 +5,13 @@ import {
   Pressable,
   StyleSheet,
   TextInput,
-  Button,
+  ActivityIndicator,
   Switch,
   TouchableOpacity,
-  ActivityIndicator,
+  Image,
+  ScrollView,
 } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import MapView, { Marker, MapPressEvent } from 'react-native-maps';
 import * as Location from 'expo-location';
 import DatePicker from 'components/DatePicker';
 import TimePicker from 'components/TimePicker';
@@ -21,17 +21,9 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { collection, addDoc } from 'firebase/firestore';
 import LocationText from 'components/LocationText';
 import * as ImagePicker from 'expo-image-picker';
-import { Image } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-type RootStackParamList = {};
+import { RootStackParamList, LocationType } from 'types';
 
-type LocationType = {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-};
 
 const AddEventModal = () => {
   const [UserLocation, setUserLocation] = useState<LocationType | null>(null);
@@ -73,27 +65,35 @@ const AddEventModal = () => {
   }, []);
 
   // Atualiza a localização ao pressionar um ponto no mapa
-  const handleMapPress = (event: MapPressEvent) => {
+  const handleMapPress = (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     setLocation({ latitude, longitude });
     setIsMapVisible(false);
   };
 
-  const uploadImages = async (images: string[]) => {
-    const urls: string[] = [];
-    for (let i = 0; i < images.length; i++) {
-      const response = await fetch(images[i]);
-      const blob = await response.blob();
-      const storageRef = ref(getStorage(), `events/${user?.uid}/${Date.now()}.jpg`);
-      await uploadBytes(storageRef, blob);
-      const url = await getDownloadURL(storageRef);
-      urls.push(url);
+  const uploadImages = async (images: string[]): Promise<string[]> => {
+    try {
+      const urls = await Promise.all(
+        images.map(async (image) => {
+          const response = await fetch(image);
+          const blob = await response.blob();
+          const storageRef = ref(
+            getStorage(),
+            `events/${user?.uid}/${Date.now()}_${Math.random()}.jpg`
+          );
+          await uploadBytes(storageRef, blob);
+          return getDownloadURL(storageRef);
+        })
+      );
+      return urls;
+    } catch (error) {
+      console.error('Erro ao fazer upload das imagens: ', error);
+      return [];
     }
-    return urls;
   };
 
   // Função para salvar evento
-  const handleSaveEvent = (
+  const handleSaveEvent = async (
     title: string,
     description: string,
     date: string,
@@ -107,6 +107,7 @@ const AddEventModal = () => {
       alert('Necessário estar logado para criar um evento');
       return;
     }
+
     const event = {
       title,
       description,
@@ -115,22 +116,21 @@ const AddEventModal = () => {
       latitude,
       longitude,
       isPublic,
-      user: user?.uid,
-      images,
+      user: user.uid,
     };
+
     setLoading(true);
 
-    uploadImages(images).then((urls) => {
-      addDoc(collection(db, 'events'), { ...event, images: urls })
-        .then(() => {
-          alert('Evento salvo com sucesso');
-          navigation.goBack();
-        })
-        .catch((error) => {
-          alert('Erro ao salvar evento');
-        })
-        .finally(() => setLoading(false));
-    });
+    try {
+      const imageUrls = await uploadImages(images);
+      await addDoc(collection(db, 'events'), { ...event, images: imageUrls });
+      alert('Evento salvo com sucesso');
+      navigation.goBack();
+    } catch (error) {
+      alert('Erro ao salvar evento: ' + error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const pickerImages = async () => {
@@ -147,7 +147,7 @@ const AddEventModal = () => {
   };
 
   return (
-    <View style={{ flex: 1, padding: 24, justifyContent: 'center' }}>
+    <View style={{ flex: 1, padding: 24 }}>
       {!isMapVisible ? (
         <>
           <Pressable style={[StyleSheet.absoluteFill]} onPress={() => navigation.goBack()} />
@@ -224,23 +224,26 @@ const AddEventModal = () => {
               <Pressable
                 style={styles.saveButton}
                 onPress={() => {
-                  if (location && selectedDate) {
+                  if (title && description && selectedDate && selectedTime && location) {
                     handleSaveEvent(
                       title,
                       description,
-                      selectedDate.toISOString().split('T')[0],
-                      selectedDate.toISOString().split('T')[1].slice(0, 5),
+                      selectedDate.toISOString().split('T')[0], // Data no formato 'YYYY-MM-DD'
+                      selectedTime.toISOString().split('T')[1].slice(0, 5), // Hora no formato 'HH:MM'
                       isPublic,
                       location.latitude,
                       location.longitude,
-                      images
+                      images // Array de URLs das imagens
                     );
                   } else {
                     alert('Preencha todos os campos');
                   }
                 }}>
-                {loading ? <ActivityIndicator size="small" color="#fff" /> : ''}
-                <Text style={styles.buttonText}>Salvar</Text>
+                {loading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Salvar</Text>
+                )}
               </Pressable>
             </View>
           </View>
@@ -266,6 +269,7 @@ const styles = StyleSheet.create({
     padding: 20,
     width: '100%',
     gap: 10,
+    marginTop: 50,
   },
   modalTitle: {
     fontSize: 24,
