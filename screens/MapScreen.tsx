@@ -75,6 +75,7 @@ const MapScreen = () => {
       alert('Você precisa estar logado para adicionar um evento');
     }
   };
+  const user = auth.currentUser;
 
   if (loading) {
     return (
@@ -83,8 +84,6 @@ const MapScreen = () => {
       </View>
     );
   }
-
-  const user = auth.currentUser;
 
   return (
     <View style={styles.container}>
@@ -112,11 +111,7 @@ const MapScreen = () => {
 
       {/* Botão de adicionar evento */}
       <TouchableOpacity style={styles.fab} onPress={() => navModal()} disabled={!user}>
-        {user ? (
-          <Ionicons name="add" size={30} color="#fff" />
-        ) : (
-          <ActivityIndicator size="small" color="#fff" />
-        )}
+        <Ionicons name="add" size={30} color="#ffffff" />
       </TouchableOpacity>
 
       {/* Modal para exibir informações do evento */}

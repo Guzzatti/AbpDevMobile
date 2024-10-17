@@ -7,10 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { auth } from '../utils/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { setDoc, doc } from 'firebase/firestore';
-import { db } from '../utils/firebase';
+import { handleRegister } from 'utils/Functions';
 
 const CreateAccountScreen = () => {
   //Variaveis para estilização dos inputs
@@ -25,41 +22,6 @@ const CreateAccountScreen = () => {
   const [email, setEmail] = useState('');
   const [password1, setPassword1] = useState('');
   const [password2, setPassword2] = useState('');
-
-  //Função para criar uma conta
-  async function handleRegister(
-    email: string,
-    password1: string,
-    password2: string,
-    username: string
-  ) {
-    if (!username || !email || !password1 || !password2) {
-      alert('Preencha todos os campos');
-      return;
-    }
-    if (username.length < 2) {
-      alert('Username precisa ter pelo menos 2 caracteres');
-      return;
-    }
-    if (password1 !== password2) {
-      alert('As senhas não coincidem');
-      return;
-    }
-    try {
-      setLoading(true);
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password1);
-      const user = userCredential.user;
-      await setDoc(doc(db, 'users', user.uid), {
-        email: user.email,
-        username,
-      });
-    } catch (e) {
-      console.error(e);
-      alert('Erro ao criar usuário');
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <View style={styles.container}>
@@ -102,7 +64,7 @@ const CreateAccountScreen = () => {
       />
       <TouchableOpacity
         style={styles.button}
-        onPress={() => handleRegister(email, password1, password2, username)}>
+        onPress={() => [handleRegister(email, password1, password2, username),setLoading(true)]}>
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
