@@ -1,18 +1,23 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { StyleSheet } from 'react-native';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 type TimePickerProps = {
   time: Date | null;
   setTime: (time: Date) => void;
   isVisible: boolean;
   setVisibility: (visible: boolean) => void;
+  text: string;
 };
 
-const TimePicker: React.FC<TimePickerProps> = ({ time, setTime, isVisible, setVisibility }) => {
+const TimePicker: React.FC<TimePickerProps> = ({ time, setTime, isVisible, setVisibility,text }) => {
   const handleTimeChange = (event: DateTimePickerEvent, selectedTime?: Date) => {
+    if (Platform.OS === 'android') {
+      setVisibility(false); // Fecha o DateTimePicker no Android
+    }
     if (selectedTime) {
       setTime(selectedTime); // Atualiza o horário sem fechar o DateTimePicker
     }
@@ -29,20 +34,28 @@ const TimePicker: React.FC<TimePickerProps> = ({ time, setTime, isVisible, setVi
   return (
     <View style={styles.timeContainer}>
       {time ? (
-        <Text style={styles.buttonText}>{formatTime(time)}</Text>
+      <Text style={styles.buttonText}>{formatTime(time)}</Text>
       ) : (
-        <Text style={styles.buttonText}>Selecione o horário</Text>
+      <Text style={styles.buttonText}>{text}</Text>
       )}
+      {Platform.OS === 'ios' ? (
+      !isVisible && (
+        <TouchableOpacity style={styles.button} onPress={toggleVisibility}>
+        <AntDesign name="clockcircleo" size={16} color="white" />
+        </TouchableOpacity>
+      )
+      ) : (
       <TouchableOpacity style={styles.button} onPress={toggleVisibility}>
-        <Fontisto name="clock" size={24} color="black" />
+        <AntDesign name="clockcircleo" size={16} color="white" />
       </TouchableOpacity>
+      )}
       {isVisible && (
-        <DateTimePicker
-          value={time || new Date()}
-          mode="time" // Modo de seleção de horário
-          display="default"
-          onChange={handleTimeChange} // Altera o horário sem fechar o picker
-        />
+      <DateTimePicker
+        value={time || new Date()}
+        mode="time" // Modo de seleção de horário
+        display="default" // Ajuste para Android
+        onChange={handleTimeChange} // Altera o horário sem fechar o picker
+      />
       )}
     </View>
   );
@@ -54,8 +67,8 @@ const styles = StyleSheet.create({
   timeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
+    width: "100%",
+    justifyContent:"space-between",
   },
   button: {
     backgroundColor: '#ff6f61',

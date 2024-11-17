@@ -3,16 +3,21 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { StyleSheet } from 'react-native';
+import { Platform } from 'react-native';
 
 type DatePickerProps = {
   date: Date | null;
   setDate: (date: Date) => void;
   isVisible: boolean;
   setVisibility: (visible: boolean) => void;
+  text:string
 };
 
-const DatePicker: React.FC<DatePickerProps> = ({ date, setDate, isVisible, setVisibility }) => {
+const DatePicker: React.FC<DatePickerProps> = ({ date, setDate, isVisible, setVisibility,text }) => {
   const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setVisibility(false); // Fecha o DateTimePicker no Android
+    }
     if (selectedDate) {
       setDate(selectedDate); // Atualiza a data sem fechar o DateTimePicker
     }
@@ -31,11 +36,19 @@ const DatePicker: React.FC<DatePickerProps> = ({ date, setDate, isVisible, setVi
       {date ? (
         <Text style={styles.buttonText}>{formatDate(date)}</Text>
       ) : (
-        <Text style={styles.buttonText}>Selecione a data</Text>
+        <Text style={styles.buttonText}>{text}</Text>
       )}
-      <TouchableOpacity style={styles.button} onPress={toggleVisibility}>
-        <Fontisto name="date" size={24} color="black" />
-      </TouchableOpacity>
+      {Platform.OS === 'ios' ? (
+        !isVisible && (
+          <TouchableOpacity style={styles.button} onPress={toggleVisibility}>
+            <Fontisto name="date" size={16} color="white" />
+          </TouchableOpacity>
+        )
+      ) : (
+        <TouchableOpacity style={styles.button} onPress={toggleVisibility}>
+          <Fontisto name="date" size={16} color="white" />
+        </TouchableOpacity>
+      )}
       {isVisible && (
         <DateTimePicker
           value={date || new Date()}
@@ -54,8 +67,9 @@ const styles = StyleSheet.create({
   timeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
+    width: "100%",
+    justifyContent:"space-between",
+   
   },
   button: {
     backgroundColor: '#ff6f61',

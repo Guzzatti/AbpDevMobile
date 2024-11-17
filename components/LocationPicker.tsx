@@ -24,7 +24,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${searchLocation}&key=${process.env.GOOGLE_MAPS_API_KEY}`
+        'https://maps.googleapis.com/maps/api/geocode/json?address=${searchLocation}&key=${process.env.GOOGLE_MAPS_API_KEY}'
       );
       const data = await response.json();
       if (data.results.length > 0) {
@@ -54,18 +54,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
           <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }} />
         )}
       </MapView>
-      <View
-        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Pesquise um local"
-          value={searchLocation}
-          onChangeText={setSearchLocation}
-        />
-        <TouchableOpacity style={styles.confirmButton} onPress={()=>handleSearchAddress()}>
-          <AntDesign name="search1" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
       <TouchableOpacity style={styles.fab} onPress={() => setIsMapVisible(false)}>
         <Text style={styles.buttonText}>Fechar Mapa</Text>
       </TouchableOpacity>

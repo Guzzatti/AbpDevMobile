@@ -5,36 +5,31 @@ import {
   Pressable,
   StyleSheet,
   TextInput,
-  Button,
+  ActivityIndicator,
   Switch,
   TouchableOpacity,
-  ActivityIndicator,
+  Image,
+  ScrollView,
 } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import MapView, { Marker, MapPressEvent } from 'react-native-maps';
 import * as Location from 'expo-location';
 import DatePicker from 'components/DatePicker';
 import TimePicker from 'components/TimePicker';
 import LocationPicker from 'components/LocationPicker';
 import { auth, db } from 'utils/firebase';
 import Entypo from '@expo/vector-icons/Entypo';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDocs, getDoc } from 'firebase/firestore';
 import LocationText from 'components/LocationText';
-
-type RootStackParamList = {};
-
-type LocationType = {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-};
+import * as ImagePicker from 'expo-image-picker';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { RootStackParamList, LocationType } from 'types';
 
 const AddEventModal = () => {
   const [UserLocation, setUserLocation] = useState<LocationType | null>(null);
   const user = auth.currentUser;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
 
   // Variáveis para coleta dos dados
   const [title, setTitle] = useState<string>('');
@@ -69,26 +64,73 @@ const AddEventModal = () => {
   }, []);
 
   // Atualiza a localização ao pressionar um ponto no mapa
-  const handleMapPress = (event: MapPressEvent) => {
+  const handleMapPress = (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     setLocation({ latitude, longitude });
     setIsMapVisible(false);
   };
 
+  const uploadImages = async (images: string[]): Promise<string[]> => {
+    try {
+      const urls = await Promise.all(
+        images.map(async (image) => {
+          const response = await fetch(image);
+          const blob = await response.blob();
+          const storageRef = ref(
+            getStorage(),
+            "events/${user?.uid}/${Date.now()}_${Math.random()}.jpg"
+          );
+          await uploadBytes(storageRef, blob);
+          return getDownloadURL(storageRef);
+        })
+      );
+      return urls;
+    } catch (error) {
+      console.error('Erro ao fazer upload das imagens: ', error);
+      return [];
+    }
+  };
+
+  async function getFollowing() {
+    if (!user) {
+      console.log("Usuário não autenticado");
+      return [];
+    }
+  
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef);
+  
+      if (userDoc.exists()) {
+        const following = userDoc.data().following || [];
+        console.log('Following: ', following);
+        return following;
+      } else {
+        console.log("Documento do usuário não encontrado.");
+        return [];
+      }
+    } catch (error) {
+      console.error("Erro ao buscar seguindo:", error);
+      return [];
+    }
+  }
+
   // Função para salvar evento
-  const handleSaveEvent = (
+  const handleSaveEvent = async (
     title: string,
     description: string,
     date: string,
     time: string,
     isPublic: boolean,
     latitude: number,
-    longitude: number
+    longitude: number,
+    images: string[]
   ) => {
     if (!user) {
       alert('Necessário estar logado para criar um evento');
       return;
     }
+
     const event = {
       title,
       description,
@@ -97,20 +139,35 @@ const AddEventModal = () => {
       latitude,
       longitude,
       isPublic,
-      user: user?.uid,
+      user: user.uid,
+      participants: await getFollowing(),
     };
+
     setLoading(true);
-    addDoc(collection(db, 'events'), event)
-      .then(() => {
-        alert('Evento salvo com sucesso');
-        navigation.goBack();
-      })
-      .catch((error) => {
-        alert('Erro ao salvar evento');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+
+    try {
+      const imageUrls = await uploadImages(images);
+      await addDoc(collection(db, 'events'), { ...event, images: imageUrls });
+      alert('Evento salvo com sucesso');
+      navigation.goBack();
+    } catch (error) {
+      alert('Erro ao salvar evento: ' + error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pickerImages = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      let selectedImages = result.assets?.map((asset) => asset.uri) || [];
+      setImages([...images, ...selectedImages]);
+    }
   };
 
   return (
@@ -139,6 +196,7 @@ const AddEventModal = () => {
               setDate={setSelectedDate}
               isVisible={isDatePickerVisible}
               setVisibility={setDatePickerVisibility}
+              text='Data'
             />
 
             <TimePicker
@@ -146,12 +204,13 @@ const AddEventModal = () => {
               setTime={setSelectedTime}
               isVisible={isTimePickerVisible}
               setVisibility={setTimePickerVisibility}
+              text='Horário'
             />
 
             <View style={styles.buttonLocation}>
               <LocationText location={location} />
               <TouchableOpacity style={styles.button} onPress={() => setIsMapVisible(true)}>
-                <Entypo name="location" size={24} color="black" />
+                <Entypo name="location" size={16} color="white" />
               </TouchableOpacity>
             </View>
 
@@ -160,30 +219,53 @@ const AddEventModal = () => {
               <Switch value={isPublic} onValueChange={setIsPublic} />
             </View>
 
+            <TouchableOpacity style={styles.button} onPress={pickerImages}>
+              <Text style={styles.buttonText}>Adicionar Imagem</Text>
+            </TouchableOpacity>
+
+            <View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ alignItems: 'center', gap: 10 }}>
+                {images.map((image, index) => (
+                  <Image
+                    key={index}
+                    source={{ uri: image }}
+                    style={{ width: 100, height: 100, borderRadius: 10 }}
+                  />
+                ))}
+              </ScrollView>
+            </View>
+
             <View style={styles.buttonsContainer}>
-              <Pressable style={styles.cancelButton} onPress={() => navigation.goBack()}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => navigation.goBack()}
+                disabled={loading}>
                 <Text style={styles.buttonText}>Cancelar</Text>
-              </Pressable>
-              <Pressable
+              </TouchableOpacity>
+              <TouchableOpacity
                 style={styles.saveButton}
-                onPress={() => {
-                  if (location && selectedDate) {
-                    handleSaveEvent(
-                      title,
-                      description,
-                      selectedDate.toISOString().split('T')[0],
-                      selectedDate.toISOString().split('T')[1].slice(0, 5),
-                      isPublic,
-                      location.latitude,
-                      location.longitude
-                    );
-                  } else {
-                    alert('Preencha todos os campos');
-                  }
-                }}>
-                {loading ? <ActivityIndicator size="small" color="#fff" /> : ''}
-                <Text style={styles.buttonText}>Salvar</Text>
-              </Pressable>
+                onPress={() =>
+                  handleSaveEvent(
+                    title,
+                    description,
+                    selectedDate?.toISOString() || '',
+                    selectedTime?.toISOString() || '',
+                    isPublic,
+                    location?.latitude || 0,
+                    location?.longitude || 0,
+                    images
+                  )
+                }
+                disabled={loading}>
+                {loading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Salvar</Text>
+                )}
+              </TouchableOpacity>
             </View>
           </View>
         </>
@@ -286,4 +368,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
+
 });
