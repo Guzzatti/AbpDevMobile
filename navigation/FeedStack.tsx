@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
-import FeedScreen from '../screens/FeedScreen';
+import FeedScreen from 'screens/FeedStack/FeedScreen';
 
 function FeedStack() {
   const Stack = createStackNavigator();

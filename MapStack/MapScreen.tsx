@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Text } from 'react-native';
 import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
-import EventModal from '../components/EventModal'; // Importe o novo componente de modal
-import { Event, RootStackParamList, LocationType } from '../types'; // Importando o tipo Event
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { auth, db } from '../utils/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
+import { db, auth } from '../../utils/firebase';
+import { Event, LocationType } from '../../types';
+import { RootStackParamList } from '../../types';
 
 const MapScreen = () => {
   // Variáveis de estilo
   const [location, setLocation] = useState<LocationType | null>(null);
   const [loading, setLoading] = useState(true);
-  const [eventModalVisible, setEventModalVisible] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
 
   //Variavel para navegação
@@ -57,16 +55,6 @@ const MapScreen = () => {
     })();
   }, []);
 
-  const handleEventPress = (event: Event) => {
-    setSelectedEvent(event);
-    setEventModalVisible(true);
-  };
-
-  const handleCloseEventModal = () => {
-    setEventModalVisible(false);
-    setSelectedEvent(null);
-  };
-
   // Função para navegar para o modal de adicionar evento
   const navModal = () => {
     if (auth.currentUser) {
@@ -103,19 +91,16 @@ const MapScreen = () => {
               coordinate={{ latitude: event.latitude, longitude: event.longitude }}
               title={event.title}
               description={event.description}
-              onCalloutPress={() => handleEventPress(event)}
+              onCalloutPress={() => navigation.navigate('EventModal', { event })}
             />
           ))}
         </MapView>
       ) : null}
 
       {/* Botão de adicionar evento */}
-      <TouchableOpacity style={styles.fab} onPress={() => navModal()} disabled={!user}>
+      <TouchableOpacity style={styles.fab} onPress={() => navModal()}>
         <Ionicons name="add" size={30} color="#ffffff" />
       </TouchableOpacity>
-
-      {/* Modal para exibir informações do evento */}
-      <EventModal event={selectedEvent} onClose={handleCloseEventModal} />
     </View>
   );
 };

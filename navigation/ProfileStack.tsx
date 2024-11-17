@@ -1,14 +1,16 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import ProfileScreen from 'screens/MyProfileScreen';
-import EditProfileScreen from 'screens/EditProfileScreen';
+import ProfileScreen from 'screens/ProfileStack/MyProfileScreen';
+import EditProfileScreen from 'screens/ProfileStack/EditProfileScreen';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../utils/firebase';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator} from 'react-native';
 import LoginScreen from 'screens/LoginScreen';
 import CreateAccountScreen from 'screens/CreateAccountScreen';
 import { TransitionPresets } from '@react-navigation/stack';
+import MenuButton from 'components/MenuButton';
+import MenuScreen from 'screens/ProfileStack/MenuScreen';
 
 function ProfileStack() {
   const Stack = createStackNavigator();
@@ -32,17 +34,22 @@ function ProfileStack() {
 
   return (
     <Stack.Navigator
-      screenOptions={{ ...TransitionPresets.SlideFromRightIOS }}
+      screenOptions={{ ...TransitionPresets.SlideFromRightIOS, title: '' }}
       initialRouteName={isLogged ? 'SearchScreen' : 'LoginScreen'}>
       {isLogged ? (
         <>
-          <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="Profile" component={ProfileScreen} 
+          options={{
+            headerRight: () => MenuButton(),
+          }}
+          />
           <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
+          <Stack.Screen name="MenuScreen" component={MenuScreen}/>
         </>
       ) : (
         <>
           <Stack.Screen name="LoginSreen" component={LoginScreen} />
-          <Stack.Screen name="CreateAccountScreen" component={CreateAccountScreen} />
+          <Stack.Screen name="CreateAccountScreen" component={CreateAccountScreen} />           
         </>
       )}
     </Stack.Navigator>

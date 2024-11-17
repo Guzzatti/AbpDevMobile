@@ -1,6 +1,6 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import SearchScreen from 'screens/SearchScreen';
-import SelectedUserProfile from 'screens/SelectedUserProfile';
+import SearchScreen from 'screens/SearchStack/SearchScreen';
+import SelectedUserProfile from 'screens/SearchStack/SelectedUserProfile';
 import { TransitionPresets } from '@react-navigation/stack';
 import { useState } from 'react';
 import { useEffect } from 'react';

@@ -76,16 +76,14 @@ const SelectedUserProfile = () => {
           following: currentUserData.following.filter((userId: string) => userId !== id),
         });
 
-        const followedUserDoc = await getDoc(followedUserRef);
-        const followedUserData = followedUserDoc.data();
+        const followedUserQuery = query(collection(db, 'users'), where('followers', 'array-contains', auth.currentUser.uid));
+        const followedUserSnapshot = await getDocs(followedUserQuery);
 
-        if (followedUserData?.followers?.includes(auth.currentUser.uid)) {
-          await updateDoc(followedUserRef, {
-            followers: followedUserData.followers.filter(
-              (userId: string) => userId !== (auth.currentUser ? auth.currentUser.uid : '')
-            ),
+        followedUserSnapshot.forEach(async (doc) => {
+          await updateDoc(doc.ref, {
+            followers: doc.data().followers.filter((userId: string) => auth.currentUser && userId !== auth.currentUser.uid),
           });
-        }
+        });
 
         setIsFollowing(false);
         return;

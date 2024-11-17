@@ -24,7 +24,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { RootStackParamList, LocationType } from 'types';
 
-
 const AddEventModal = () => {
   const [UserLocation, setUserLocation] = useState<LocationType | null>(null);
   const user = auth.currentUser;
@@ -167,24 +166,27 @@ const AddEventModal = () => {
               onChangeText={setDescription}
             />
 
+            <View style={{flexDirection:'row',width:"100%", justifyContent:"space-between"}}>
             <DatePicker
               date={selectedDate}
               setDate={setSelectedDate}
               isVisible={isDatePickerVisible}
               setVisibility={setDatePickerVisibility}
+              text={"Data de inicio"}
             />
-
             <TimePicker
               time={selectedTime}
               setTime={setSelectedTime}
               isVisible={isTimePickerVisible}
               setVisibility={setTimePickerVisibility}
+              text={"Horario de inicio"}
             />
 
+            </View>
             <View style={styles.buttonLocation}>
               <LocationText location={location} />
               <TouchableOpacity style={styles.button} onPress={() => setIsMapVisible(true)}>
-                <Entypo name="location" size={24} color="white" />
+                <Entypo name="location" size={16} color="white" />
               </TouchableOpacity>
             </View>
 
@@ -268,7 +270,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     width: '100%',
-    gap: 10,
+    gap: 16,
     marginTop: 50,
   },
   modalTitle: {
@@ -282,7 +284,6 @@ const styles = StyleSheet.create({
     borderColor: '#d1d1d1',
     padding: 12,
     borderRadius: 10,
-
     fontSize: 16,
     width: '100%',
   },

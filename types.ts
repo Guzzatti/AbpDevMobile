@@ -37,5 +37,7 @@ export type RootStackParamList = {
   MapScreen: undefined;
   MyProfileScreen: undefined;
   SearchScreen: undefined;
+  EventModal: { event: Event };
   SelectedUserProfile: { id: string; username: string; email: string; profileImageUrl: string };
+  MenuScreen: undefined;
 };
