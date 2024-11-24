@@ -18,7 +18,7 @@ import TimePicker from 'components/TimePicker';
 import LocationPicker from 'components/LocationPicker';
 import { auth, db } from 'utils/firebase';
 import Entypo from '@expo/vector-icons/Entypo';
-import { collection, addDoc, doc, getDocs, getDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
 import LocationText from 'components/LocationText';
 import * as ImagePicker from 'expo-image-picker';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -78,7 +78,7 @@ const AddEventModal = () => {
           const blob = await response.blob();
           const storageRef = ref(
             getStorage(),
-            "events/${user?.uid}/${Date.now()}_${Math.random()}.jpg"
+            `events/${user?.uid}/${Date.now()}_${Math.random()}.jpg`
           );
           await uploadBytes(storageRef, blob);
           return getDownloadURL(storageRef);
@@ -130,6 +130,13 @@ const AddEventModal = () => {
       alert('Necessário estar logado para criar um evento');
       return;
     }
+    const currentDate = new Date();
+    const eventDate = new Date(date);
+
+    if (eventDate < currentDate) {
+      alert('Não é possível criar um evento no passado');
+      return;
+    }
 
     const event = {
       title,
@@ -159,7 +166,7 @@ const AddEventModal = () => {
 
   const pickerImages = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, 
       allowsMultipleSelection: true,
       quality: 1,
     });
@@ -245,27 +252,31 @@ const AddEventModal = () => {
                 disabled={loading}>
                 <Text style={styles.buttonText}>Cancelar</Text>
               </TouchableOpacity>
-              <TouchableOpacity
+                <TouchableOpacity
                 style={styles.saveButton}
-                onPress={() =>
+                onPress={() => {
+                  if (!title || !selectedDate || !selectedTime || !location) {
+                  alert('Por favor, preencha todos os campos obrigatórios.');
+                  return;
+                  }
                   handleSaveEvent(
-                    title,
-                    description,
-                    selectedDate?.toISOString() || '',
-                    selectedTime?.toISOString() || '',
-                    isPublic,
-                    location?.latitude || 0,
-                    location?.longitude || 0,
-                    images
-                  )
-                }
+                  title,
+                  description,
+                  selectedDate.toISOString(),
+                  selectedTime.toISOString(),
+                  isPublic,
+                  location.latitude,
+                  location.longitude,
+                  images
+                  );
+                }}
                 disabled={loading}>
                 {loading ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
                   <Text style={styles.buttonText}>Salvar</Text>
                 )}
-              </TouchableOpacity>
+                </TouchableOpacity>
             </View>
           </View>
         </>
@@ -317,7 +328,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     flex: 1,
-    marginRight: 10,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
@@ -350,7 +360,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
   },
   button: {
     backgroundColor: '#ff6f61',

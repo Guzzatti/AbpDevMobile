@@ -11,31 +11,15 @@ const LocationText: React.FC<{ location: LocationType | null }> = ({ location })
   const [loading, setLoading] = useState(false);
 
   const fetchAddress = async () => {
-    if (location) {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${location.latitude}&lon=${location.longitude}&format=json`
-        );
-
-        const data = await response.json();
-
-        if (data && data.address) {
-          const { postcode, road } = data.address; // Extrai o CEP e o nome da rua
-
-          // Monta a string do endereço
-          const tempAddress = `${road ? road : 'Rua não encontrada'}, ${postcode ? postcode : 'CEP não encontrado'}`;
-          setAddress(tempAddress);
-        } else {
-          setAddress('Endereço não encontrado');
-        }
-      } catch (error) {
-        console.error('Erro ao buscar endereço:', error);
-        setAddress('Erro ao buscar endereço');
-      } finally {
-        setLoading(false);
-      }
-    }
+    const apikey = "AIzaSyCJhYQLFrOt17sz_LIlh_WboLA26090cNA"
+    if (!location) return;
+    setLoading(true);
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.latitude},${location.longitude}&key=${apikey}`,
+    );
+    const data = await response.json();
+    setAddress(data.results[0].formatted_address.split(',').slice(0, 3).join(', '));
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -55,5 +39,6 @@ export default LocationText;
 const styles = StyleSheet.create({
   textLocation: {
     fontSize: 16,
+    width: '80%',
   },
 });

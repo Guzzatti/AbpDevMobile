@@ -40,4 +40,5 @@ export type RootStackParamList = {
   EventModal: { event: Event };
   SelectedUserProfile: { id: string; username: string; email: string; profileImageUrl: string };
   MenuScreen: undefined;
+  EditEvent: { event: Event };
 };

@@ -11,6 +11,7 @@ import CreateAccountScreen from 'screens/CreateAccountScreen';
 import { TransitionPresets } from '@react-navigation/stack';
 import MenuButton from 'components/MenuButton';
 import MenuScreen from 'screens/ProfileStack/MenuScreen';
+import EditEvent from 'screens/ProfileStack/EditEvent';
 
 function ProfileStack() {
   const Stack = createStackNavigator();
@@ -45,6 +46,7 @@ function ProfileStack() {
           />
           <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
           <Stack.Screen name="MenuScreen" component={MenuScreen}/>
+          <Stack.Screen name="EditEvent" component={EditEvent}/>
         </>
       ) : (
         <>

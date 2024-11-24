@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList, UserType, Event } from 'types';
 import { FlatList } from 'react-native-gesture-handler';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 const ProfileScreen = () => {
   const [loading, setLoading] = useState(true);
@@ -111,11 +112,18 @@ const ProfileScreen = () => {
         <FlatList
           data={posts}
           renderItem={({ item }) => (
+            <Pressable
+              onPress={() => {
+                navigation.navigate('EditEvent', { event: item });
+              }}
+              >
             <View style={styles.postContainer}>
               <Text style={styles.postTitle}>{item.title}</Text>
               <Text style={styles.postDate}>{item.date}</Text>
               <Text style={styles.postDescription}>{item.description}</Text>
+    
             </View>
+            </Pressable>
           )}
           keyExtractor={(item) => item.id}
         />
@@ -174,6 +182,7 @@ const styles = StyleSheet.create({
   postDescription: {
     fontSize: 16,
   },
+
 });
 
 export default ProfileScreen;
