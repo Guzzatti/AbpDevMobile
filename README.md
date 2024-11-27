@@ -9,7 +9,9 @@ https://encurtador.com.br/WCCoK
 - [Gabriel Guzzati](https://github.com/Guzzatti)
 - [Gabriel Milano](https://github.com/gabrielmilano)
 - [Paulo Dal Ponte](https://github.com/pauloDalponte)
+-  [Jefferson Barzan Alexandrino](https://github.com/JeffAlexandrino)
 
+ 
 ### Setup
 Para rodar o projeto, siga os passos abaixo:
 
