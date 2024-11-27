@@ -1,6 +1,8 @@
 # Party Radar
 Projeto final da matéria de Soluções Mobile na Unisatc.
 
+https://encurtador.com.br/WCCoK
+
 ### Integrantes
 
 - [Eliandra Cardoso](https://github.com/ardnaile)
